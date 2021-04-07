@@ -1,19 +1,20 @@
 require("dotenv").config();
+
 import http from "http";
-import mongoose from "mongoose";
-import app from "./app";
+import api from "./api";
+import db from "./db";
 
 const port = process.env.PORT || 3000;
-const server = http.createServer(app);
+const dbUri = process.env.DB_URI || "mongodb://localhost:27017/mern_db";
 
-(async () => {
-  mongoose.set("useCreateIndex", true);
-  await mongoose.connect(process.env.DB_URI, {
-    useUnifiedTopology: true,
-  });
-  console.log("💿 Database successfully connected!");
+const server = http.createServer(api);
 
-  server.listen(port, () => {
-    console.log(`🚀 API running on http://localhost:${port}`);
-  });
-})();
+db(dbUri)
+  .then(() => {
+    console.log("DB is running and the connection is established");
+
+    server.listen(port, () => {
+      console.log(`API Running on http://localhost:${port}`);
+    });
+  })
+  .catch((err) => console.error(err.message));
